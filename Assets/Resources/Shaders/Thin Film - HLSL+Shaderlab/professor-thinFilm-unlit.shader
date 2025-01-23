@@ -2,7 +2,10 @@
 {
     Properties
     {
-        
+        _tEnviro ("Cube Map", Cube) = "" { } // environment cubemap
+        _tData ("Base Texture", 2D) = "white" { } // main texture
+        _tonemapFlag ("Tonemap Flag", Int) = 0
+        _exposure ("Exposure", Float) = 1
     }
     SubShader
     {
@@ -20,8 +23,23 @@
 
             #include "UnityCG.cginc"
 
-            // "Properties" field declarations
+            #define saturate(a) clamp(a, 0.0, 1.0)
+            #define one_over_pi_by_2 0.63661977236
 
+            // "Properties" field declarations
+            samplerCUBE _tEnviro;
+            sampler2D _tData;
+            int _tonemapFlag;
+            float _exposure;
+
+            // Custom function
+            float3 tonemap(float3 color)
+            {
+                if (_tonemapFlag == 0)
+                    return color;
+                color *= _exposure;
+                return saturate(color);
+            }
 
             // supplied by Unity
             struct appdata
@@ -46,20 +64,27 @@
                 o.position = UnityObjectToClipPos(v.position);
                 o.uv = v.uv;
                 o.normal = UnityObjectToWorldNormal(v.normal);
-                
+
                 UNITY_TRANSFER_FOG(o, o.vertex);
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            float4 frag(v2f i) : SV_Target
             {
-                // color output
-                fixed4 col = fixed4(1, 1, 1, 1);
+                float3 viewDirection = normalize(i.position);
+                float3 N = normalize(i.normal);
+                float incidentAngle = acos(dot(-viewDirection, N));
+                float3 reflectDirection = reflect(viewDirection, N);
+                
+                float x = -dot(unity_WorldToCamera[0], reflectDirection);
+                float y = dot(unity_WorldToCamera[1], reflectDirection);
+                float z = dot(unity_WorldToCamera[2], reflectDirection);
+                float3 reflectDirectionWorld = float3(x, y, z);
 
-                
-                
-                UNITY_APPLY_FOG(i.fogCoord, col); // apply fog
-                return col;
+                float3 vColor = texCUBE(_tEnviro, reflectDirectionWorld).rgb * tex2D(_tData, float2(incidentAngle * one_over_pi_by_2, 0.5)).rgb;
+                float4 fragColor = float4(tonemap(vColor), 1);
+                UNITY_APPLY_FOG(i.fogCoord, fragColor); // apply fog (?)
+                return fragColor;
             }
             ENDCG
         }

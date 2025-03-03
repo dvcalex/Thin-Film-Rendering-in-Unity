@@ -8,9 +8,19 @@ public class DataTexture : MonoBehaviour
     {
         RGB,
         RGBA
-    } 
+    }
+
+    public enum Coat
+    {
+        PerfectMirror,
+        Coat1Layer,
+        Coat4Layer,
+    }
     
     public Renderer renderer;
+    [SerializeField] private Coat currentCoat = Coat.PerfectMirror;
+    
+    private Coat lastCoat = Coat.PerfectMirror;
 
     private double[] coat1layer =
     {
@@ -133,14 +143,42 @@ public class DataTexture : MonoBehaviour
         0.9999999999999994
     };
 
-    private void Update()
+    private void Start()
     {
         HandleDataTexture();
     }
 
+    private void Update()
+    {
+        if (lastCoat != currentCoat)
+        {
+            lastCoat = currentCoat;
+            HandleDataTexture();
+        }
+    }
+
     public void HandleDataTexture()
     {
-        double[] coatToUse = coat1layer;
+        double[] coatToUse;
+
+        switch (currentCoat)
+        {
+            case Coat.PerfectMirror:
+                coatToUse = new double[273];
+                for (int i = 0; i < coatToUse.Length; ++i)
+                    coatToUse[i] = 1.0;
+                break;
+            case Coat.Coat1Layer:
+                coatToUse = coat1layer;
+                break;
+            case Coat.Coat4Layer:
+                coatToUse = coat4layer;
+                break;
+            default:
+                Debug.LogError("Something went wrong");
+                return;
+        }
+        
         float[] coat = new float[coatToUse.Length];
         
         for (int i = 0; i < coat.Length; i++)
@@ -149,8 +187,6 @@ public class DataTexture : MonoBehaviour
         }
         
         Texture2D dataTexture = CreateDataTexture(91, 1, coat, Format.RGB);
-        //renderer = new Material(Shader.Find("Custom/ThinFilm"));
-        //material.SetTexture("_tData", dataTexture);
         renderer.sharedMaterial.mainTexture = dataTexture;
     }
 
@@ -178,7 +214,7 @@ public class DataTexture : MonoBehaviour
         
         texture.SetPixels(pixelData);
         texture.Apply();
-        Debug.Log($"Applied Texture to {renderer.name}");
+        Debug.Log($"Applied data texture to material on renderer {renderer.name}");
         return texture;
     }
 }

@@ -42,7 +42,7 @@ Shader "Custom/ThinFilm"
 
             struct v2f
             {
-                float3 worldViewDir : TEXCOORD0;
+                float3 worldToCamDir : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
                 float3 worldRefl : TEXCOORD2;
                 float4 pos : SV_POSITION;
@@ -64,16 +64,17 @@ Shader "Custom/ThinFilm"
                 // compute world space position of the vertex
                 float3 worldPos = mul(unity_ObjectToWorld, v.vertex).xyz;
                 
-                // compute world space view direction ((viewPos - worldPos) normalized)
-                float3 worldViewDir = normalize(UnityWorldSpaceViewDir(worldPos));
-                o.worldViewDir = worldViewDir;
+                // get normalized direction from world vertex position to camera position
+                //      UnityWorldSpaceViewDir(worldPos) == (_WorldSpaceCameraPos.xyz - worldPos)
+                float3 worldToCamDir = normalize(UnityWorldSpaceViewDir(worldPos));
+                o.worldToCamDir = worldToCamDir;
                 
                 // world space normal
                 float3 worldNormal = UnityObjectToWorldNormal(v.normal);
                 o.worldNormal = worldNormal;
                 
                 // world space reflection vector
-                o.worldRefl = reflect(-worldViewDir, worldNormal);
+                o.worldRefl = reflect(-worldToCamDir, worldNormal);
                 
                 return o;
             }
@@ -96,7 +97,7 @@ Shader "Custom/ThinFilm"
                     );
                 
                 // Calculate incident angle in worldspace
-                float incidentAngle = acos(dot(-i.worldViewDir, i.worldNormal));
+                float incidentAngle = acos(dot(i.worldToCamDir, i.worldNormal));
                 
                 // decode cubemap data into actual color
                 float3 envColor = DecodeHDR(envSample, unity_SpecCube0_HDR);

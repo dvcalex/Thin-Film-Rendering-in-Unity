@@ -10,7 +10,6 @@ Shader "Custom/ThinFilm"
         //_tData ("Data Texture", 2D) = "white" { } // data texture for thin film
         _tonemapFlag ("Tonemap Flag", Int) = 0
         _exposure ("Exposure", Float) = 1
-        _smoothness ("Smoothness", Float) = 1 // used to control "blurriness" of mirror
     }
     SubShader
     {
@@ -32,7 +31,6 @@ Shader "Custom/ThinFilm"
             float4 _MainTex_ST;
             int _tonemapFlag;
             float _exposure;
-            float _smoothness;
 
             struct appdata
             {
@@ -45,7 +43,7 @@ Shader "Custom/ThinFilm"
                 float3 worldToCamDir : TEXCOORD0;
                 float3 worldNormal : TEXCOORD1;
                 float3 worldRefl : TEXCOORD2;
-                float4 pos : SV_POSITION;
+                float4 pos : SV_POSITION; // used as output from the shader
             };
 
             float3 tonemap(float3 color)
@@ -56,9 +54,17 @@ Shader "Custom/ThinFilm"
                 return saturate(color); // clamp(color, 0, 1)
             }
 
+            float3 GetCube(float3 _vector, half _smoothness)
+            {
+                float mip = _smoothness * 6.0;
+                float4 rgbm = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, _vector, mip);
+                return DecodeHDR(rgbm, unity_SpecCube0_HDR);
+            }
+
             v2f vert (appdata v)
             {
                 v2f o;
+                // vertex output from the shader
                 o.pos = UnityObjectToClipPos(v.vertex);
                 
                 // compute world space position of the vertex
@@ -81,39 +87,14 @@ Shader "Custom/ThinFilm"
         
             fixed4 frag (v2f i) : SV_Target
             {
-                float roughness = 1 - _smoothness;
-                roughness *= 1.7 - 0.7 * roughness; // formula to convert roughness value into mipmap level
+                float3 envColor = GetCube(i.worldRefl, 0);
 
-                /*
-                 * TODO: I think unity_SpecCube0 is losing resolution somehow (look into SamplerState),
-                 *      which makes reflection very low res.
-                */
-                
-                // sample the default reflection cubemap, using the reflection vector
-                float4 envSample = UNITY_SAMPLE_TEXCUBE_LOD(
-                    unity_SpecCube0,
-                    i.worldRefl,
-                    roughness * 6 // use 6 as it is the value of UNITY_SPECCUBE_LOD_STEPS which is not included here for some reason
-                    );
-                
                 // Calculate incident angle in worldspace
                 float incidentAngle = acos(dot(i.worldToCamDir, i.worldNormal));
                 
-                // decode cubemap data into actual color
-                float3 envColor = DecodeHDR(envSample, unity_SpecCube0_HDR);
-
-                /*
-                 * TODO: Convert the texture data into a texture format (or just slap in the data texture
-                 *      arrays in the code instead of using _tData).
-                */
-                
-                // color
                 float4 c = 0;
-                /*
-                 * assuming tex2D sampler input is represented from (0,0)->(1,1),
-                 *      then we are sample the y value in the middle (0.5f).
-                */
                 c.rgb = envColor;
+                // sample data texture for coat layers
                 c.rgb *= tex2D(_MainTex, float2(incidentAngle * one_over_pi_by_2, 0)).rgb;
                 c = float4(tonemap(c), 1);
                 return c;

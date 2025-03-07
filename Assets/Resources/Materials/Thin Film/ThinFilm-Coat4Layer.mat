@@ -123,7 +123,7 @@ Material:
     - _Surface: 0
     - _WorkflowMode: 1
     - _ZWrite: 1
-    - _exposure: 16
+    - _exposure: 15
     - _smoothness: 1
     - _tonemapFlag: 1
     m_Colors:

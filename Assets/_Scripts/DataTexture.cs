@@ -143,18 +143,14 @@ public class DataTexture : MonoBehaviour
         0.9999999999999994
     };
 
-    private void Start()
-    {
-        HandleDataTexture();
-    }
+    // private void Start()
+    // {
+    //     HandleDataTexture();
+    // }
 
     private void Update()
     {
-        if (lastCoat != currentCoat)
-        {
-            lastCoat = currentCoat;
-            HandleDataTexture();
-        }
+        HandleDataTexture();
     }
 
     public void HandleDataTexture()
@@ -176,7 +172,7 @@ public class DataTexture : MonoBehaviour
                 break;
             default:
                 Debug.LogError("Something went wrong");
-                return;
+                return; // return early
         }
         
         float[] coat = new float[coatToUse.Length];
@@ -214,7 +210,7 @@ public class DataTexture : MonoBehaviour
         
         texture.SetPixels(pixelData);
         texture.Apply();
-        Debug.Log($"Applied data texture to material on renderer {renderer.name}");
+        //Debug.Log($"Applied data texture to material on renderer {renderer.name}");
         return texture;
     }
 }

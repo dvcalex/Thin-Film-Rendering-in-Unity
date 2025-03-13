@@ -98,6 +98,8 @@ Shader "Custom/ThinFilm"
                 c.rgb *= tex2D(_MainTex, float2(incidentAngle * one_over_pi_by_2, 0)).rgb;
                 c = float4(tonemap(c), 1);
                 return c;
+
+                // TODO: Get original cubemap working, iridescent layers, documentation
             }
             ENDCG
         }

@@ -5,9 +5,8 @@ Shader "Custom/ThinFilm"
 {
     Properties
     {
-        //_hdrEnv ("HDR Environment Texture", 2D) = "white" {} // environment map
-        _MainTex ("Texture", 2D) = "white" {}
-        //_tData ("Data Texture", 2D) = "white" { } // data texture for thin film
+        //_envCube ("Environment Cube Map", Cube) = "" {} // environment map
+        _MainTex ("Texture", 2D) = "white" {} // what we send the data texture through
         _tonemapFlag ("Tonemap Flag", Int) = 0
         _exposure ("Exposure", Float) = 1
     }
@@ -24,9 +23,8 @@ Shader "Custom/ThinFilm"
             #define saturate(a) clamp(a, 0.0, 1.0)
             #define one_over_pi_by_2 0.63661977236
 
-            //sampler2D _hdrEnv;
-            //float4 _hdrEnv_HDR;
-            //sampler2D _tData;
+            //sampler2D _envCube;
+            //float4 _envCube_HDR;
             sampler2D _MainTex;
             float4 _MainTex_ST;
             int _tonemapFlag;

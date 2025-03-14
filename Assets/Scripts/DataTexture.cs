@@ -1,32 +1,25 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [ExecuteAlways]
 public class DataTexture : MonoBehaviour
 {
-    public enum Format
-    {
-        RGB,
-        RGBA
-    }
-
-    public enum Coat
+    public enum DataTexType
     {
         PerfectMirror,
         Coat1Layer,
         Coat4Layer,
         IridescentLayer1,
         IridescentLayer2,
+        Random,
         None
     }
     
-    //public Renderer renderer;
-    public Material material;
-    [SerializeField] private Coat currentCoat = Coat.PerfectMirror;
+    public Material targetMaterial;
+    [SerializeField] private DataTexType currentDataTexType = DataTexType.None;
     
-    private Coat lastCoat = Coat.PerfectMirror;
-
-    private double[] coat1layer =
+    private readonly double[] _coat1Layer =
     {
         0.017828628328346703, 0.01782620077280887, 0.017818936600813857, 0.017806891364654978, 0.017790157880441405,
         0.017768866574442883, 0.01774318597385883, 0.01771332334803968, 0.017679525508107852, 0.01764207977500221,
@@ -85,7 +78,7 @@ public class DataTexture : MonoBehaviour
         0.8004793070051479, 0.894370334991837, 0.9999999999999991
     };
 
-    private double[] coat4layer =
+    private readonly double[] _coat4Layer =
     {
         0.0014700989531489688, 0.0014714687812553613, 0.001475585129289977, 0.0014824686132538316, 0.001492153678996269,
         0.001504688741469995, 0.0015201364006211466, 0.001538573754765263, 0.0015600928381345161, 0.0015848012150149865,
@@ -147,7 +140,7 @@ public class DataTexture : MonoBehaviour
         0.9999999999999994
     };
 
-    private double[] iridescence1 =
+    private readonly double[] _iridescence1 =
     {
         0.15768235660819999, 0.1577457922414247, 0.15793597795142533, 0.15825254931008115, 0.1586948960953129,
         0.15926215810433175, 0.1599532194434613, 0.16076670144386956, 0.16170095439254223, 0.1627540483059936,
@@ -205,7 +198,7 @@ public class DataTexture : MonoBehaviour
         0.6054138854074855, 0.66944303759613, 0.7399816453489133, 0.817892202380663, 0.9041771557423928
     };
 
-    private double[] iridescence2 =
+    private readonly double[] _iridescence2 =
     {
         0.02895933001229866, 0.02897209323240605, 0.02901037938257211, 0.029074177775835416, 0.029163470086787536,
         0.029278229608226243, 0.029418420264914123, 0.029583995438237295, 0.02977489666999684, 0.029991052327297003,
@@ -276,77 +269,64 @@ public class DataTexture : MonoBehaviour
 
     public void HandleDataTexture()
     {
-        double[] coatToUse;
-        int width;
-        Format format = Format.RGB;
+        // we use this since some of our input data is originally as double values
+        double[] rawDataAsDouble;
 
-        switch (currentCoat)
+        switch (currentDataTexType)
         {
-            case Coat.PerfectMirror:
-                coatToUse = new double[273];
-                for (int i = 0; i < coatToUse.Length; ++i)
-                    coatToUse[i] = 1.0;
+            case DataTexType.PerfectMirror:
+                rawDataAsDouble = new[] { 1.0 };
                 break;
-            case Coat.Coat1Layer:
-                coatToUse = coat1layer;
+            case DataTexType.Coat1Layer:
+                rawDataAsDouble = _coat1Layer;
                 //Debug.Log($"coat1layer: {coat1layer.Length}");
                 break;
-            case Coat.Coat4Layer:
-                coatToUse = coat4layer;
+            case DataTexType.Coat4Layer:
+                rawDataAsDouble = _coat4Layer;
                 //Debug.Log($"coat4layer: {coat4layer.Length}");
                 break;
-            case Coat.IridescentLayer1:
-                coatToUse = iridescence1;
+            case DataTexType.IridescentLayer1:
+                rawDataAsDouble = _iridescence1;
                 //Debug.Log($"iridescence1: {iridescence1.Length}");
                 break;
-            case Coat.IridescentLayer2:
-                coatToUse = iridescence2;
+            case DataTexType.IridescentLayer2:
+                rawDataAsDouble = _iridescence2;
                 //Debug.Log($"iridescence2: {iridescence2.Length}");
                 break;
+            case DataTexType.Random:
+                rawDataAsDouble = new double[273];
+                
+                break;
+            case DataTexType.None:
+                return;
             default:
+                Debug.LogError("Not able to handle data texture of type: " + currentDataTexType);
                 return; // return early
         }
         
         // convert to float array
-        float[] coat = new float[coatToUse.Length];
-        for (int i = 0; i < coat.Length; i++)
-            coat[i] = (float)coatToUse[i];
-
-
-        if (format == Format.RGB)
-        {
-            width = coat.Length / 3;
-        }
-        else
-        {
-            width = coat.Length;
-        }
+        float[] rawData = new float[rawDataAsDouble.Length];
+        for (int i = 0; i < rawData.Length; i++)
+            rawData[i] = (float)rawDataAsDouble[i];
         
-        Texture2D dataTexture = CreateDataTexture(width, 1, coat, format);
+        // set width of data texture (length of rawData / 3 since its RGB data that we are handling)
+        int width = Mathf.Clamp((rawData.Length / 3), 1, Int32.MaxValue);
+        
+        Texture2D dataTexture = CreateDataTexture(width, 1, rawData);
         if (dataTexture != null)
-            material.mainTexture = dataTexture;
+            targetMaterial.mainTexture = dataTexture;
     }
 
-    public Texture2D CreateDataTexture(int width, int height, float[] rawData, Format format)
+    public Texture2D CreateDataTexture(int width, int height, float[] rawData)
     {
         Texture2D texture = new Texture2D(width, height);
 
-        Color[] pixelData;
-        if (format == Format.RGB)
+        // convert raw data to RGB data
+        int subLength = rawData.Length / 3;
+        Color[] pixelData = new Color[subLength];
+        for (int i = 0; i < pixelData.Length; ++i)
         {
-            int subLength = rawData.Length / 3;
-            pixelData = new Color[subLength];
-
-            for (int i = 0; i < pixelData.Length; ++i)
-            {
-                pixelData[i] = new Color(rawData[i], rawData[i + subLength], rawData[i + (2 * subLength)], 1);
-            }
-            
-        }
-        else
-        {
-            Debug.LogError("Invalid format");
-            return null;
+            pixelData[i] = new Color(rawData[i], rawData[i + subLength], rawData[i + (2 * subLength)], 1);
         }
 
         if (pixelData.Length != width)
@@ -355,9 +335,9 @@ public class DataTexture : MonoBehaviour
             return null;
         }
         
+        // set texture
         texture.SetPixels(pixelData);
         texture.Apply();
-        //Debug.Log($"Applied data texture to material on renderer {renderer.name}");
         return texture;
     }
 }

@@ -409,8 +409,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686b65d3340c49b18e3b82f32ce684af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 7a86a722a59373f43806fcff03cc8dfa, type: 2}
-  currentCoat: 2
+  targetMaterial: {fileID: 2100000, guid: 7a86a722a59373f43806fcff03cc8dfa, type: 2}
+  currentDataTexType: 2
 --- !u!23 &706375634
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -591,8 +591,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686b65d3340c49b18e3b82f32ce684af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 54a944a598607a84f881ddd12fe3cb3a, type: 2}
-  currentCoat: 3
+  targetMaterial: {fileID: 2100000, guid: 54a944a598607a84f881ddd12fe3cb3a, type: 2}
+  currentDataTexType: 3
 --- !u!23 &865846629
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -669,7 +669,7 @@ GameObject:
   - component: {fileID: 894160088}
   - component: {fileID: 894160089}
   m_Layer: 0
-  m_Name: ~MANAGERS~
+  m_Name: ~~~Managers~~~
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -702,8 +702,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 53bdf1ee9db3429590345839a1c7d178, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  recalculateTextureOnce: 0
-  recalculateTextureConstant: 1
+  recalculateTextureOnce: 1
+  recalculateTextureConstant: 0
 --- !u!1 &1515746200
 GameObject:
   m_ObjectHideFlags: 0
@@ -735,8 +735,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686b65d3340c49b18e3b82f32ce684af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 264323256f74b724999099fd3cffb639, type: 2}
-  currentCoat: 4
+  targetMaterial: {fileID: 2100000, guid: 264323256f74b724999099fd3cffb639, type: 2}
+  currentDataTexType: 4
 --- !u!23 &1515746202
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -901,8 +901,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686b65d3340c49b18e3b82f32ce684af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 09010f71b6d2e644eae97cbaeafc72a9, type: 2}
-  currentCoat: 0
+  targetMaterial: {fileID: 2100000, guid: 09010f71b6d2e644eae97cbaeafc72a9, type: 2}
+  currentDataTexType: 0
 --- !u!23 &1687094274
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1064,8 +1064,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 686b65d3340c49b18e3b82f32ce684af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  material: {fileID: 2100000, guid: 947f3a41d66213442a8b9348fd058c43, type: 2}
-  currentCoat: 1
+  targetMaterial: {fileID: 2100000, guid: 947f3a41d66213442a8b9348fd058c43, type: 2}
+  currentDataTexType: 1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

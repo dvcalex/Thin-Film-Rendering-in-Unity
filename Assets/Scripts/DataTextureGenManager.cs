@@ -2,10 +2,9 @@
 using UnityEngine;
 
 
-[ExecuteAlways]
-public class DataTextureManager : MonoBehaviour
+public class DataTextureGenManager : MonoBehaviour
 {
-    public static DataTextureManager Instance = null;
+    public static DataTextureGenManager Instance = null;
 
     private void Awake()
     {
@@ -26,7 +25,7 @@ public class DataTextureManager : MonoBehaviour
         if (recalculateTextureOnce || recalculateTextureConstant)
         {
             recalculateTextureOnce = false;
-            onRecalculateTexture?.Invoke();
+            onRecalculateTexture?.Invoke(); // try to call delegate if not null
         }
     }
 }

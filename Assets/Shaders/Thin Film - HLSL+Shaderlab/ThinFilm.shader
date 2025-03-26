@@ -52,7 +52,7 @@ Shader "Custom/ThinFilm"
                 return saturate(color); // clamp(color, 0, 1)
             }
 
-            float3 GetCube(float3 _vector, half _smoothness)
+            float3 GetCube(float3 _vector, half _smoothness) 
             {
                 float mip = _smoothness * 6.0;
                 float4 rgbm = UNITY_SAMPLE_TEXCUBE_LOD(unity_SpecCube0, _vector, mip);

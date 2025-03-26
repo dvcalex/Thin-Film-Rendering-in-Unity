@@ -68,7 +68,7 @@ Shader "Unlit/Random0"
                 v2f o;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.normal = v.normal; 
-                o.normal = UnityObjectToWorldNormal(o.normal); 
+                o.normal = UnityObjectToWorldNormal(o.normal);
 
                 o.uv = v.uv0;
                 return o;

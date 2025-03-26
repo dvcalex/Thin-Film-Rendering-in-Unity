@@ -2,10 +2,9 @@
 using UnityEngine;
 
 
-[ExecuteAlways]
-public class DataTextureManager : MonoBehaviour
+public class DataTextureGenManager : MonoBehaviour
 {
-    public static DataTextureManager Instance = null;
+    public static DataTextureGenManager Instance = null;
 
     private void Awake()
     {

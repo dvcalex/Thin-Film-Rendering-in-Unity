@@ -2,8 +2,7 @@
 using UnityEngine;
 using UnityEngine.Serialization;
 
-[ExecuteAlways]
-public class DataTexture : MonoBehaviour
+public class DataTextureGen : MonoBehaviour
 {
     public enum DataTexType
     {
@@ -18,6 +17,7 @@ public class DataTexture : MonoBehaviour
     
     public Material targetMaterial;
     [SerializeField] private DataTexType currentDataTexType = DataTexType.None;
+    
     
     private readonly double[] _coat1Layer =
     {
@@ -259,12 +259,12 @@ public class DataTexture : MonoBehaviour
 
     private void OnEnable()
     {
-        DataTextureManager.Instance.onRecalculateTexture += HandleDataTexture;
+        DataTextureGenManager.Instance.onRecalculateTexture += HandleDataTexture;
     }
 
     private void OnDisable()
     {
-        DataTextureManager.Instance.onRecalculateTexture -= HandleDataTexture;
+        DataTextureGenManager.Instance.onRecalculateTexture -= HandleDataTexture;
     }
 
     public void HandleDataTexture()
@@ -275,23 +275,23 @@ public class DataTexture : MonoBehaviour
         switch (currentDataTexType)
         {
             case DataTexType.PerfectMirror:
-                rawDataAsDouble = new[] { 1.0 };
+                rawDataAsDouble = new[] { 1.0 , 1.0, 1.0 };
                 break;
             case DataTexType.Coat1Layer:
                 rawDataAsDouble = _coat1Layer;
-                //Debug.Log($"coat1layer: {coat1layer.Length}");
+                //Debug.Log($"coat1layer: {_coat1Layer.Length}");
                 break;
             case DataTexType.Coat4Layer:
                 rawDataAsDouble = _coat4Layer;
-                //Debug.Log($"coat4layer: {coat4layer.Length}");
+                //Debug.Log($"coat4layer: {_coat4Layer.Length}");
                 break;
             case DataTexType.IridescentLayer1:
                 rawDataAsDouble = _iridescence1;
-                //Debug.Log($"iridescence1: {iridescence1.Length}");
+                //Debug.Log($"iridescence1: {_iridescence1.Length}");
                 break;
             case DataTexType.IridescentLayer2:
                 rawDataAsDouble = _iridescence2;
-                //Debug.Log($"iridescence2: {iridescence2.Length}");
+                //Debug.Log($"iridescence2: {_iridescence2.Length}");
                 break;
             case DataTexType.Random:
                 rawDataAsDouble = new double[273];
@@ -304,10 +304,11 @@ public class DataTexture : MonoBehaviour
                 return; // return early
         }
         
-        // convert to float array
+        // cast doubles to float array
         float[] rawData = new float[rawDataAsDouble.Length];
         for (int i = 0; i < rawData.Length; i++)
             rawData[i] = (float)rawDataAsDouble[i];
+        
         
         // set width of data texture (length of rawData / 3 since its RGB data that we are handling)
         int width = Mathf.Clamp((rawData.Length / 3), 1, Int32.MaxValue);
@@ -331,7 +332,7 @@ public class DataTexture : MonoBehaviour
 
         if (pixelData.Length != width)
         {
-            Debug.LogError("Invalid data length");
+            Debug.LogError($"Invalid data length : pixelData.Length = {pixelData.Length} : width = {width}");
             return null;
         }
         

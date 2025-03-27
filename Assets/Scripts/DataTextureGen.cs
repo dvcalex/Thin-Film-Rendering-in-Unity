@@ -19,6 +19,7 @@ public class DataTextureGen : MonoBehaviour
     [SerializeField] private DataTexType dataTextureType = DataTexType.None;
     
     
+    
     private readonly double[] _coat1Layer =
     {
         0.017828628328346703, 0.01782620077280887, 0.017818936600813857, 0.017806891364654978, 0.017790157880441405,

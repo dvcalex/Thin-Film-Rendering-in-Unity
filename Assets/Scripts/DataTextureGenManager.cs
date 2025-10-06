@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 
-
 public class DataTextureGenManager : MonoBehaviour
 {
     public static DataTextureGenManager Instance = null;
